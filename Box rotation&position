@@ -9,7 +9,10 @@ const box = BABYLON.MeshBuilder.CreateBox("box", {}); //unit cube
 box.scaling.x = 2;
 box.scaling.y = 1.5;
 box.scaling.z = 3;
+
+box.position.x = -2;
 box.position.y = 0.75;
+box.position.z = 0.1;
 
 box.rotation.y = Math.PI / 4;
 
