@@ -1,0 +1,45 @@
+const CreateScene = function () {
+
+const scene = new BABYLON.Scene(engine); 
+//Creates basic Babylon scene
+const camera = new BABYLON.FreeCamera("Camera1", new BABYLON.Vector3(0, 5, -10), scene);
+//Creates a free camera
+camera.setTarget(BABYLON.Vector3.Zero());
+//Targets camera to the origin of the scene
+camera.attachControl(canvas, true);
+//Attaches camera
+const light = new BABYLON.HemisphericLight("Light", new BABYLON.Vector3(0, 1, 0), scene);
+//Creates light
+const sphere = BABYLON.MeshBuilder.CreateSphere("sphere", {Diameter: 2, Segments: 32}, scene);
+//Creates a sphere
+
+const frameRate = 10;
+
+const yRot = new BABYLON.Animation("yRot", "rotation.y", frameRate, BABYLON.Animation.ANIMATIONTYPE_FLOAT, BABYLON.Animation.ANIMATIONLOOPMODE_CYCLE);
+
+const keyFramesR = [];
+
+keyFramesR.push({
+  frame: 0,
+  value: 0,
+});
+
+keyFramesR.push({
+  frame: frameRate,
+  value: Math.PI,
+});
+
+keyFramesR.push({
+  frame: 2 * frameRate,
+  value: 2 * Math.PI,
+});
+
+yRot.setKeys(keyFramesR);
+
+sphere.animations.push(yRot);
+
+//This creates an animation which makes the sphere rotate around its y-axis.
+scene.beginAnimation(sphere, 0, 2 * frameRate, true);
+
+return scene;
+}
