@@ -1,0 +1,74 @@
+        // Load the Babylon 3D engine
+        const engine = new BABYLON.Engine(canvas, true);
+
+        // Create a basic scene
+        const createScene = function () {
+            const scene = new BABYLON.Scene(engine);
+
+            // Create and position the camera
+            const camera = new BABYLON.ArcRotateCamera("camera", BABYLON.Tools.ToRadians(45), BABYLON.Tools.ToRadians(45), 150, new BABYLON.Vector3(0, 0, 0), scene);
+            camera.attachControl(canvas, true);
+
+            // Add lighting
+            const light = new BABYLON.HemisphericLight("light", new BABYLON.Vector3(0, 1, 0), scene);
+            light.intensity = 0.8;
+
+            // Create the Sun (center of the solar system)
+            const sun = BABYLON.MeshBuilder.CreateSphere("sun", { diameter: 10 }, scene);
+            sun.position = new BABYLON.Vector3(0, 0, 0);
+            const sunMaterial = new BABYLON.StandardMaterial("sunMat", scene);
+            sunMaterial.emissiveColor = new BABYLON.Color3(1, 1, 0); // Glow like a sun
+            sun.material = sunMaterial;
+
+            // Create Mercury
+            const mercury = BABYLON.MeshBuilder.CreateSphere("mercury", { diameter: 1 }, scene);
+            mercury.position = new BABYLON.Vector3(58, 0, 0); // Mercury's average distance from Sun
+            const mercuryMaterial = new BABYLON.StandardMaterial("mercuryMat", scene);
+            mercuryMaterial.diffuseColor = new BABYLON.Color3(0.5, 0.5, 0.5); // Mercury's gray surface
+            mercury.material = mercuryMaterial;
+
+            // Physics Variables for simulation
+            const G = 6.674 * Math.pow(10, -11); // Gravitational constant (scaled down)
+            const massSun = 1.989 * Math.pow(10, 30); // Mass of the Sun
+            const massMercury = 3.285 * Math.pow(10, 23); // Mass of Mercury
+            const scaleFactor = 1e-10; // Scale for manageable numbers
+
+            // Initialize Mercury's velocity (orbital speed)
+            let velocityMercury = new BABYLON.Vector3(0, 0, 47.4 * scaleFactor); // Z-axis tangential speed
+
+            // Animation loop to simulate orbit
+            scene.registerBeforeRender(function () {
+                // Calculate distance between Sun and Mercury
+                let distance = BABYLON.Vector3.Distance(sun.position, mercury.position);
+                let direction = mercury.position.subtract(sun.position).normalize(); // Direction from Sun to Mercury
+
+                // Calculate gravitational force
+                let forceMagnitude = (G * massSun * massMercury) / (distance * distance) * scaleFactor;
+                let force = direction.scale(-forceMagnitude);
+
+                // Apply force as acceleration
+                let accelerationMercury = force.scale(1 / massMercury);
+                velocityMercury.addInPlace(accelerationMercury); // Update velocity
+
+                // Update Mercury's position based on its velocity
+                mercury.position.addInPlace(velocityMercury);
+            });
+
+            return scene;
+        };
+
+        // Create the scene
+        const scene = createScene();
+
+        // Render loop
+        engine.runRenderLoop(function () {
+            scene.render();
+        });
+
+        // Handle window resize
+        window.addEventListener("resize", function () {
+            engine.resize();
+        });
+
+
+//This code does not work for some reason. it is possible that babylon gets overloaded and keeps focusing on the code first inputted. New code will not be registered. How to combat this is unknown.
