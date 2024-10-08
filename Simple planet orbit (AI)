@@ -1,0 +1,63 @@
+// This creates a Babylon.js scene and engine instance that will work in the Playground.
+
+// Get the canvas DOM element
+const canvas = document.getElementById("renderCanvas");
+
+// Load the 3D engine
+const engine = new BABYLON.Engine(canvas, true);
+
+// Create the scene function
+const createScene = function () {
+    // Create a new scene
+    const scene = new BABYLON.Scene(engine);
+
+    // Create an ArcRotateCamera that orbits around the scene (central planet)
+    const camera = new BABYLON.ArcRotateCamera("camera1", Math.PI / 2, Math.PI / 3, 30, new BABYLON.Vector3(0, 0, 0), scene);
+    camera.attachControl(canvas, true);
+
+    // Add a light to the scene
+    const light = new BABYLON.HemisphericLight("light1", new BABYLON.Vector3(0, 1, 0), scene);
+    light.intensity = 0.8;
+
+    // Create a central planet (e.g., a star or large planet)
+    const centralPlanet = BABYLON.MeshBuilder.CreateSphere("centralPlanet", { diameter: 4 }, scene);
+    centralPlanet.material = new BABYLON.StandardMaterial("centralMaterial", scene);
+    centralPlanet.material.diffuseColor = new BABYLON.Color3(1, 0.8, 0); // Yellow color
+
+    // Create a smaller planet that will orbit around the central planet
+    const orbitingPlanet = BABYLON.MeshBuilder.CreateSphere("orbitingPlanet", { diameter: 1 }, scene);
+    orbitingPlanet.material = new BABYLON.StandardMaterial("orbitingMaterial", scene);
+    orbitingPlanet.material.diffuseColor = new BABYLON.Color3(0, 0.5, 1); // Blue color
+
+    // Set the initial position of the orbiting planet
+    const orbitRadius = 10;
+    orbitingPlanet.position.x = orbitRadius;
+
+    // Rotate the orbiting planet around the central planet
+    scene.registerBeforeRender(() => {
+        const time = performance.now() * 0.001; // Get the current time in seconds
+        const rotationSpeed = 0.5; // Speed of the orbit
+
+        // Update the position of the orbiting planet using cosine and sine for circular movement
+        orbitingPlanet.position.x = Math.cos(time * rotationSpeed) * orbitRadius;
+        orbitingPlanet.position.z = Math.sin(time * rotationSpeed) * orbitRadius;
+    });
+
+    return scene;
+};
+
+// Create the scene
+const scene = createScene();
+
+// Register a render loop to repeatedly render the scene
+engine.runRenderLoop(function () {
+    scene.render();
+});
+
+// Watch for browser/canvas resize events
+window.addEventListener("resize", function () {
+    engine.resize();
+});
+
+
+//Though the code does work, for some reason an error message occurs saying: You must at least create a scene.
