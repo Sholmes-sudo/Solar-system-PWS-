@@ -1,1 +1,120 @@
+// Create the engine
+const canvas = document.getElementById("renderCanvas"); // The canvas element
+const engine = new BABYLON.Engine(canvas, true); // Generate the Babylon.js engine
 
+// Create the scene
+const createScene = function () {
+    // Create a new scene
+    const scene = new BABYLON.Scene(engine);
+
+    // Create an ArcRotateCamera that follows the rocket
+    const camera = new BABYLON.ArcRotateCamera("camera1", Math.PI / 2, Math.PI / 3, 60, new BABYLON.Vector3(0, 0, 0), scene);
+    camera.attachControl(canvas, true);
+
+    // Add a light to the scene to simulate sunlight
+    const sunLight = new BABYLON.PointLight("sunLight", new BABYLON.Vector3(0, 0, 0), scene);
+    sunLight.intensity = 1.5;
+
+    // Add a space-themed skybox
+    const skybox = BABYLON.MeshBuilder.CreateBox("skyBox", { size: 1000 }, scene);
+    const skyboxMaterial = new BABYLON.StandardMaterial("skyBoxMaterial", scene);
+    skyboxMaterial.backFaceCulling = false;
+    skyboxMaterial.disableLighting = true;
+    skyboxMaterial.reflectionTexture = new BABYLON.CubeTexture("https://www.babylonjs.com/assets/space", scene);
+    skyboxMaterial.reflectionTexture.coordinatesMode = BABYLON.Texture.SKYBOX_MODE;
+    skyboxMaterial.diffuseColor = new BABYLON.Color3(0, 0, 0);
+    skyboxMaterial.specularColor = new BABYLON.Color3(0, 0, 0);
+    skybox.material = skyboxMaterial;
+
+    // Create the Sun (central star)
+    const sun = BABYLON.MeshBuilder.CreateSphere("sun", { diameter: 8 }, scene);
+    const sunMaterial = new BABYLON.StandardMaterial("sunMaterial", scene);
+    sunMaterial.emissiveColor = new BABYLON.Color3(1, 0.8, 0); // Emissive yellow color to simulate glowing
+    sun.material = sunMaterial;
+
+    // Create Mercury
+    const mercury = BABYLON.MeshBuilder.CreateSphere("mercury", { diameter: 1 }, scene);
+    const mercuryMaterial = new BABYLON.StandardMaterial("mercuryMaterial", scene);
+    mercuryMaterial.diffuseColor = new BABYLON.Color3(0.5, 0.5, 0.5); // Grey color for Mercury
+    mercury.material = mercuryMaterial;
+
+    // Set realistic values for Mercury's orbit (scaled down for the game)
+    const AU = 20; // Astronomical Unit scaled down for the game
+    const mercuryOrbitRadius = 0.39 * AU; // Mercury's average distance from the Sun in AU scaled down
+
+    // Set the initial position of Mercury
+    mercury.position.x = mercuryOrbitRadius;
+
+    // Rotate Mercury around the Sun
+    scene.onBeforeRenderObservable.add(() => {
+        const time = performance.now() * 0.001; // Get the current time in seconds
+        const mercuryOrbitalSpeed = 0.05; // Slower speed for a more realistic effect
+
+        // Update the position of Mercury using cosine and sine for circular movement
+        mercury.position.x = Math.cos(time * mercuryOrbitalSpeed) * mercuryOrbitRadius;
+        mercury.position.z = Math.sin(time * mercuryOrbitalSpeed) * mercuryOrbitRadius;
+    });
+
+    // Create the Rocket
+    const rocket = BABYLON.MeshBuilder.CreateBox("rocket", { height: 2, width: 1, depth: 1 }, scene);
+    const rocketMaterial = new BABYLON.StandardMaterial("rocketMaterial", scene);
+    rocketMaterial.diffuseColor = new BABYLON.Color3(0.8, 0.1, 0.1); // Red color for the rocket
+    rocket.material = rocketMaterial;
+    rocket.position = new BABYLON.Vector3(10, 0, 0);
+
+    // Set up basic movement and control variables
+    const speed = 0.05;
+    const rotationSpeed = 0.03;
+    const keys = { w: false, s: false, a: false, d: false };
+
+    // Listen for key events
+    window.addEventListener("keydown", (event) => {
+        keys[event.key.toLowerCase()] = true;
+    });
+
+    window.addEventListener("keyup", (event) => {
+        keys[event.key.toLowerCase()] = false;
+    });
+
+    // Update rocket movement
+    scene.onBeforeRenderObservable.add(() => {
+        // Forward/backward movement
+        if (keys["w"]) {
+            rocket.position.x += Math.sin(rocket.rotation.y) * speed;
+            rocket.position.z += Math.cos(rocket.rotation.y) * speed;
+        }
+        if (keys["s"]) {
+            rocket.position.x -= Math.sin(rocket.rotation.y) * speed;
+            rocket.position.z -= Math.cos(rocket.rotation.y) * speed;
+        }
+
+        // Rotation
+        if (keys["a"]) {
+            rocket.rotation.y -= rotationSpeed;
+        }
+        if (keys["d"]) {
+            rocket.rotation.y += rotationSpeed;
+        }
+
+        // Update camera to follow the rocket
+        camera.setTarget(rocket.position);
+    });
+
+    return scene;
+};
+
+// Call the createScene function
+const scene = createScene();
+
+// Register a render loop to repeatedly render the scene
+engine.runRenderLoop(function () {
+    scene.render();
+});
+
+// Watch for browser/canvas resize events
+window.addEventListener("resize", function () {
+    engine.resize();
+});
+
+
+//Code works! Simple box as a rocket. 
