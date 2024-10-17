@@ -74,8 +74,19 @@ window.addEventListener("resize", () => {
     engine.resize();
 });
 
+
+
+
+
+
 //Pretty good, howevere the sun was way too small. I added some changes to make it bigger:
 //Here is the updated version
+
+
+
+
+
+
 
 // Create the engine
 const canvas = document.getElementById("renderCanvas"); // The canvas element
