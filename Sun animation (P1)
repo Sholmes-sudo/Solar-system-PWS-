@@ -1,45 +1,61 @@
 const CreateScene = function () {
+    const scene = new BABYLON.Scene(engine); 
+    // Creates a new scene which holds eveything
 
-const scene = new BABYLON.Scene(engine); 
-//Creates basic Babylon scene
-const camera = new BABYLON.FreeCamera("Camera1", new BABYLON.Vector3(0, 5, -10), scene);
-//Creates a free camera
-camera.setTarget(BABYLON.Vector3.Zero());
-//Targets camera to the origin of the scene
-camera.attachControl(canvas, true);
-//Attaches camera
-const light = new BABYLON.HemisphericLight("Light", new BABYLON.Vector3(0, 1, 0), scene);
-//Creates light
-const sphere = BABYLON.MeshBuilder.CreateSphere("sphere", {Diameter: 2, Segments: 32}, scene);
-//Creates a sphere
 
-const frameRate = 10;
+    const camera = new BABYLON.FreeCamera("Camera1", new BABYLON.Vector3(0, 5, -10), scene);
+    // Creates a free camera that can be moved freely around the scene
+    // positioned at (0, 5, -10), which translates to 0 units in the x-direction, 5 units in y-direction or up, and 10 units back or in z-direction
 
-const yRot = new BABYLON.Animation("yRot", "rotation.y", frameRate, BABYLON.Animation.ANIMATIONTYPE_FLOAT, BABYLON.Animation.ANIMATIONLOOPMODE_CYCLE);
+    camera.setTarget(BABYLON.Vector3.Zero());
+    // Points the camera towards the center of the scene (0, 0, 0).
+    
+    camera.attachControl(canvas, true);
+    // Attaches camera controls to the canvas, allowing the user to move it
 
-const keyFramesR = [];
 
-keyFramesR.push({
-  frame: 0,
-  value: 0,
-});
+    const light = new BABYLON.HemisphericLight("Light", new BABYLON.Vector3(0, 1, 0), scene);
+    // Creates a dim light that shines from above 
+    // The Vector3(0, 1, 0) means the light is positioned directly above the scene.
 
-keyFramesR.push({
-  frame: frameRate,
-  value: Math.PI,
-});
+    const sphere = BABYLON.MeshBuilder.CreateSphere("sphere", {diameter: 2, segments: 32}, scene);
+    // Creates a sphere object with a diameter of 2 and 32 segments for a smooth, rounded look. 
+    // Segments determine smoothness of shape, less segments means a blocky appearance, more segments means a smooth appearance
+    
+    
+    const frameRate = 10;
+    // Defines the "frame rate" of the animation. Higher frame rates mean smoother motion, but 10 is fine for this basic animation
+    
+    const yRot = new BABYLON.Animation("yRot", "rotation.y", frameRate, BABYLON.Animation.ANIMATIONTYPE_FLOAT, BABYLON.Animation.ANIMATIONLOOPMODE_CYCLE);
+// yRot = Name of the animation
+// rotation.y = Property to animate (rotation around the y-axis)
+// frameRate = Frame rate for animation
+// BABYLON.Animation.ANIMATIONTYPE_FLOAT = Type of animation (here, a floating-point number, a number that has a decimal point)
+// BABYLON.Animation.ANIMATIONLOOPMODE_CYCLE = Loop mode (cycle makes it repeat)
+// Creates a new animation that will rotate the sphere around its y-axis.
 
-keyFramesR.push({
-  frame: 2 * frameRate,
-  value: 2 * Math.PI,
-});
 
-yRot.setKeys(keyFramesR);
+    const keyFramesR = [];
+    
+    keyFramesR.push({ frame: 0, value: 0 });
+    // First keyframe: At frame 0, the y-rotation value is 0 (starting position).
+    
+    keyFramesR.push({ frame: frameRate, value: Math.PI });
+    // Second keyframe: At frame 10 (frameRate), the y-rotation value is π (half rotation).
+    
+    keyFramesR.push({ frame: 2 * frameRate, value: 2 * Math.PI });
+    // Third keyframe: At frame 20 (2 * frameRate), the y-rotation value is 2π (a full rotation).
+    
+    yRot.setKeys(keyFramesR);
+    // Adds the keyframes to the `yRot` animation, so it smoothly transitions from one rotation value to the next.
 
-sphere.animations.push(yRot);
+    sphere.animations.push(yRot);
+    // Associates the y-axis rotation animation with the sphere, allowing the sphere to be animated along the y-axis
 
-//This creates an animation which makes the sphere rotate around its y-axis.
-scene.beginAnimation(sphere, 0, 2 * frameRate, true);
+    scene.beginAnimation(sphere, 0, 2 * frameRate, true);
+    // Starts the animation on the sphere, beginning at frame 0 and ending at frame 20, with looping enabled
+    // The `true` parameter at the end makes the animation repeat forever
 
-return scene;
+    return scene;
+    // Returns the completed scene
 }
