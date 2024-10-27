@@ -1,0 +1,54 @@
+const createScene = function () {
+    const scene = new BABYLON.Scene(engine); // Creates a new scene 
+
+    const camera = new BABYLON.ArcRotateCamera("camera1", Math.PI / 2, Math.PI / 3, 60, new BABYLON.Vector3(0, 0, 0), scene); // Creates a camera that orbits around the origin, simulating a distant view of the Sun
+    camera.attachControl(canvas, true); // Attaches control to the canvas, allowing camera movement
+
+    const sunLight = new BABYLON.PointLight("sunLight", new BABYLON.Vector3(0, 0, 0), scene); // Creates a point light at the origin to represent sunlight
+    sunLight.intensity = 1.5; // Sets the intensity of the light to 1.5
+
+    const skybox = BABYLON.MeshBuilder.CreateBox("skyBox", { size: 1000 }, scene); // Creates a large box for the background (skybox), simulating outer space
+    const skyboxMaterial = new BABYLON.StandardMaterial("skyBoxMaterial", scene); // Defines a material for the background (skybox)
+    skyboxMaterial.backFaceCulling = false; // Ensures the inside of the skybox is visible
+    skyboxMaterial.disableLighting = true; // Disable lighting on the skybox so that it is completely lit
+    skyboxMaterial.reflectionTexture = new BABYLON.CubeTexture("https://playground.babylonjs.com/textures/space", scene); // Apply a space texture to the skybox
+    skyboxMaterial.reflectionTexture.coordinatesMode = BABYLON.Texture.SKYBOX_MODE; // Set the texture to wrap around all faces
+    skyboxMaterial.diffuseColor = new BABYLON.Color3(0, 0, 0); //Sets the diffuse colour (base colour of object) to black
+    skyboxMaterial.specularColor = new BABYLON.Color3(0, 0, 0); // Sets the specular colour (colour of light reflections) to black: 
+    skybox.material = skyboxMaterial; // Assigns the material to the skybox
+
+    const sun = BABYLON.MeshBuilder.CreateSphere("sun", { diameter: 8 }, scene); // Creates a sphere to represent the Sun with a diameter of 8
+    const sunMaterial = new BABYLON.StandardMaterial("sunMaterial", scene); // Creates a material for the Sun
+    sunMaterial.emissiveColor = new BABYLON.Color3(1, 0.8, 0); // Sets an emissive yellow color for a glowing effect
+    sun.material = sunMaterial; // Applies the material to the Sun
+
+    const mercury = BABYLON.MeshBuilder.CreateSphere("mercury", { diameter: 1 }, scene); // Creates a smaller sphere for Mercury with a diameter of 1
+    const mercuryMaterial = new BABYLON.StandardMaterial("mercuryMaterial", scene); // Creates a material for Mercury
+    mercuryMaterial.diffuseColor = new BABYLON.Color3(0.5, 0.5, 0.5); // Sets Mercury’s color to grey
+    mercury.material = mercuryMaterial; // Applies the material to Mercury
+
+    const AU = 20; // Define one Astronomical Unit (AU) in game units for scaling
+    const mercuryOrbitRadius = 0.39 * AU; // Calculates Mercury's orbit radius as 0.39 AU (0.39 * distance sun-earth)
+
+    mercury.position.x = mercuryOrbitRadius; // Sets Mercury's beginning position on the x-axis at the orbit radius
+
+    scene.onBeforeRenderObservable.add(() => { // Adds an update function that runs before each frame render
+        const time = performance.now() * 0.001; // Obtains the current time in seconds
+        const mercuryOrbitalSpeed = 0.05; // Sets Mercury's orbital speed
+
+        mercury.position.x = Math.cos(time * mercuryOrbitalSpeed) * mercuryOrbitRadius; // Updates Mercury’s x position
+        mercury.position.z = Math.sin(time * mercuryOrbitalSpeed) * mercuryOrbitRadius; // Updates Mercury’s z position
+    });
+
+    return scene; // Return the created scene
+};
+
+const scene = createScene();
+
+engine.runRenderLoop(function () { // Register a loop to continuously render the scene
+    scene.render(); // Render the scene
+});
+
+window.addEventListener("resize", function () { // Add a resize event listener for the window
+    engine.resize(); // Resize the engine when the window is resized
+});
