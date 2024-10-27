@@ -1,0 +1,75 @@
+
+// Create the scene
+const createScene = function () {
+    const scene = new BABYLON.Scene(engine);
+    
+    // Add a camera
+    const camera = new BABYLON.ArcRotateCamera("camera", Math.PI / 2, Math.PI / 4, 100, BABYLON.Vector3.Zero(), scene);
+    camera.attachControl(canvas, true);
+
+    // Add a light to the scene
+    const light = new BABYLON.HemisphericLight("light", new BABYLON.Vector3(0, 1, 0), scene);
+
+    // Create the Sun (increased diameter)
+    const sun = BABYLON.MeshBuilder.CreateSphere("sun", { diameter: 20 }, scene); // Increased size
+    const sunMaterial = new BABYLON.StandardMaterial("sunMaterial", scene);
+    sunMaterial.emissiveColor = new BABYLON.Color3(1, 0.8, 0); // Yellow color for the Sun
+    sun.material = sunMaterial;
+
+    // Create planets and their properties
+    const planets = [];
+    const planetData = [
+        { name: "Mercury", color: new BABYLON.Color3(0.5, 0.5, 0.5), orbitRadius: 8, diameter: 0.38, speed: 4.74 }, // km/s
+        { name: "Venus", color: new BABYLON.Color3(0.8, 0.6, 0.3), orbitRadius: 14, diameter: 0.95, speed: 3.5 }, // km/s
+        { name: "Earth", color: new BABYLON.Color3(0, 0, 1), orbitRadius: 20, diameter: 1.0, speed: 2.98 }, // km/s
+        { name: "Mars", color: new BABYLON.Color3(1, 0, 0), orbitRadius: 30, diameter: 0.53, speed: 2.41 }, // km/s
+        { name: "Jupiter", color: new BABYLON.Color3(0.8, 0.5, 0.3), orbitRadius: 80, diameter: 11.21, speed: 1.31 }, // km/s
+        { name: "Saturn", color: new BABYLON.Color3(1, 0.8, 0.5), orbitRadius: 140, diameter: 9.45, speed: 0.97 }, // km/s
+        { name: "Uranus", color: new BABYLON.Color3(0.5, 0.8, 1), orbitRadius: 300, diameter: 4.01, speed: 0.68 }, // km/s
+        { name: "Neptune", color: new BABYLON.Color3(0.2, 0.3, 1), orbitRadius: 470, diameter: 3.88, speed: 0.54 }, // km/s
+    ];
+
+    // Create planets based on the data
+    planetData.forEach(data => {
+        const planet = BABYLON.MeshBuilder.CreateSphere(data.name, { diameter: data.diameter }, scene);
+        const material = new BABYLON.StandardMaterial(data.name + "Material", scene);
+        material.diffuseColor = data.color;
+        planet.material = material;
+
+        // Set initial position and angle
+        planet.position.x = data.orbitRadius; // Set position based on the new radius
+        planet.angle = 0; // Initialize angle
+        planets.push({ mesh: planet, radius: data.orbitRadius, speed: data.speed });
+    });
+
+    // Animation loop to update planet positions
+    scene.onBeforeRenderObservable.add(() => {
+        const deltaTime = engine.getDeltaTime() * 0.001; // Get time in seconds
+
+        planets.forEach(({ mesh, speed, radius }) => {
+            // Update the angle based on speed and delta time
+            mesh.angle += (speed * 0.05) * deltaTime; // Adjust speed for visibility
+            // Update position based on the angle
+            mesh.position.x = Math.cos(mesh.angle) * radius;
+            mesh.position.z = Math.sin(mesh.angle) * radius;
+        });
+    });
+
+    return scene;
+};
+
+// Call the createScene function
+const scene = createScene();
+
+// Register a render loop to repeatedly render the scene
+engine.runRenderLoop(() => {
+    scene.render();
+});
+
+// Watch for browser/canvas resize events
+window.addEventListener("resize", () => {
+    engine.resize();
+});
+
+
+
