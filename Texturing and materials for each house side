@@ -1,89 +1,56 @@
 const createScene = () => {
-const scene = new BABYLON.Scene(engine);
-const camera = new BABYLON.ArcRotateCamera("Camera", -Math.PI / 2, Math.PI / 2.5, 3, new BABYLON.Vector3(0, 0, 0), scene);
-camera.attachControl(canvas, true);
-
-const light = new BABYLON.HemisphericLight("light", new BABYLON.Vector3(0, 1, 0), scene);
-const ground = BABYLON.MeshBuilder.CreateGround("ground", {width:10, height:10 });
-
-
-
-
-const faceUV = [];
-faceUV[0] = new BABYLON.Vector4(0.5, 0.0, 0.75, 1.0);
-faceUV[1] = new BABYLON.Vector4(0.0, 0.0, 0.25, 1.0);
-faceUV[2] = new BABYLON.Vector4(0.25, 0, 0.5, 1.0);
-faceUV[3] = new BABYLON.Vector4(0.75, 0, 1.0, 1.0);
-
-const box = BABYLON.MeshBuilder.CreateBox("box", {faceUV: faceUV, wrap: true});
-
-box.position.y = 0.5
-
-const roof = BABYLON.MeshBuilder.CreateCylinder("roof", {diameter: 1.3, height: 1.2, tessellation: 3});
-roof.scaling.x = 0.75;
-roof.rotation.z = Math.PI / 2;
-roof.position.y = 1.22;
-
-const groundMat = new BABYLON.StandardMaterial("groundMat");
-groundMat.diffuseColor = new BABYLON.Color3(0, 1, 0);
-ground.material = groundMat; 
-const roofMat = new BABYLON.StandardMaterial("roofMat");
-roofMat.diffuseTexture = new BABYLON.Texture("https://assets.babylonjs.com/environments/roof.jpg", scene);
-const boxMat = new BABYLON.StandardMaterial("boxMat");
-boxMat.diffuseTexture = new BABYLON.Texture("https://www.babylonjs-playground.com/textures/floor.png");
-
-roof.material = roofMat;
-box.material = boxMat;
-
-
-
-
-return scene;
-}
-
-
-
-//Not perfect, due to the wrong arrangements of code. See below for the right arrangement according to the docuemntation:
-const createScene =  () => {
     const scene = new BABYLON.Scene(engine);
+    //Creates a new scene which holds everything
 
-    /**** Set camera and light *****/
-    const camera = new BABYLON.ArcRotateCamera("camera", -Math.PI / 2, Math.PI / 2.5, 10, new BABYLON.Vector3(0, 0, 0));
+    // Adds a rotating camera that points to the scene's origin (0,0,0)
+    const camera = new BABYLON.ArcRotateCamera("Camera", -Math.PI / 2, Math.PI / 2.5, 3, new BABYLON.Vector3(0, 0, 0), scene);
     camera.attachControl(canvas, true);
-    const light = new BABYLON.HemisphericLight("light", new BABYLON.Vector3(1, 1, 0));
 
-    /**** Materials *****/
-    //color
+    // Add a dim ight from above
+    const light = new BABYLON.HemisphericLight("light", new BABYLON.Vector3(0, 1, 0), scene);
+
+    // Add a flat ground that is 10x10 units
+    const ground = BABYLON.MeshBuilder.CreateGround("ground", {width: 10, height: 10});
+
+  
+    // Adds ground material with a green colour
+    // Code 'materials' gives surfaces colour or textures
     const groundMat = new BABYLON.StandardMaterial("groundMat");
-    groundMat.diffuseColor = new BABYLON.Color3(0, 1, 0)
+    groundMat.diffuseColor = new BABYLON.Color3(0, 1, 0); // This sets the colour to green
+    ground.material = groundMat; //This applies this material (green colour) to the ground object
 
-    //texture
+    // Creates the roof material with a texture image (roof tiles)
     const roofMat = new BABYLON.StandardMaterial("roofMat");
-    roofMat.diffuseTexture = new BABYLON.Texture("https://assets.babylonjs.com/environments/roof.jpg");
+    roofMat.diffuseTexture = new BABYLON.Texture("https://assets.babylonjs.com/environments/roof.jpg", scene);
+
+    // Box material with a texture image (brick wall); once a box is made, it will have this texture
     const boxMat = new BABYLON.StandardMaterial("boxMat");
-    boxMat.diffuseTexture = new BABYLON.Texture("https://assets.babylonjs.com/environments/cubehouse.png")
+    boxMat.diffuseTexture = new BABYLON.Texture("https://www.babylonjs-playground.com/textures/floor.png", scene);
+
+ 
+    // UV mappings 'FcaeUV' (process that allows me to apply a 2D image onto a 3D object) lets me apply different parts of textures to each face of the box
+    // This is also necessary for adding textures of windows and doors as each side has a different placement
+    const faceUV = [
+        new BABYLON.Vector4(0.5, 0.0, 0.75, 1.0), // back face
+        new BABYLON.Vector4(0.0, 0.0, 0.25, 1.0), // front face
+        new BABYLON.Vector4(0.25, 0, 0.5, 1.0),   // right side
+        new BABYLON.Vector4(0.75, 0, 1.0, 1.0)    // left side
+    ];
 
 
-    //options parameter to set different images on each side
-    const faceUV = [];
-    faceUV[0] = new BABYLON.Vector4(0.5, 0.0, 0.75, 1.0); //rear face
-    faceUV[1] = new BABYLON.Vector4(0.0, 0.0, 0.25, 1.0); //front face
-    faceUV[2] = new BABYLON.Vector4(0.25, 0, 0.5, 1.0); //right side
-    faceUV[3] = new BABYLON.Vector4(0.75, 0, 1.0, 1.0); //left side
-    // top 4 and bottom 5 not seen so not set
-    
-
-    /**** World Objects *****/
+    // Create a box with customized textures on each face using faceUV; applies the code above
     const box = BABYLON.MeshBuilder.CreateBox("box", {faceUV: faceUV, wrap: true});
     box.material = boxMat;
-    box.position.y = 0.5;
+    box.position.y = 0.5; // lift box slightly above ground
+
+    // Create a roof as a cylinder (3-sided for triangular shape)
     const roof = BABYLON.MeshBuilder.CreateCylinder("roof", {diameter: 1.3, height: 1.2, tessellation: 3});
     roof.material = roofMat;
-    roof.scaling.x = 0.75;
-    roof.rotation.z = Math.PI / 2;
-    roof.position.y = 1.22;
-    const ground = BABYLON.MeshBuilder.CreateGround("ground", {width:10, height:10});
-    ground.material = groundMat;
+    roof.scaling.x = 0.75;         // make roof narrower in width
+    roof.rotation.z = Math.PI / 2; // rotate the roof to sit on top of the box
+    roof.position.y = 1.22;        // position it just above the box
 
+    // Return the completed scene
     return scene;
 }
+
