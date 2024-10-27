@@ -1,63 +1,49 @@
-// This creates a Babylon.js scene and engine instance that will work in the Playground.
-
-// Get the canvas DOM element
-const canvas = document.getElementById("renderCanvas");
-
-// Load the 3D engine
-const engine = new BABYLON.Engine(canvas, true);
-
-// Create the scene function
 const createScene = function () {
-    // Create a new scene
-    const scene = new BABYLON.Scene(engine);
+    const scene = new BABYLON.Scene(engine); 
+// Create a new scene using the engine
+    
+    const camera = new BABYLON.ArcRotateCamera("camera1", Math.PI / 2, Math.PI / 3, 30, new BABYLON.Vector3(0, 0, 0), scene); 
+// Creates an ArcRotateCamera that orbits around the scene, starting at a distance of 30 and looking at the origin (0,0,0)
 
-    // Create an ArcRotateCamera that orbits around the scene (central planet)
-    const camera = new BABYLON.ArcRotateCamera("camera1", Math.PI / 2, Math.PI / 3, 30, new BABYLON.Vector3(0, 0, 0), scene);
-    camera.attachControl(canvas, true);
+    camera.attachControl(canvas, true); 
+// Attaches camera controls to the canvas, allowing user interaction with the camera
 
-    // Add a light to the scene
     const light = new BABYLON.HemisphericLight("light1", new BABYLON.Vector3(0, 1, 0), scene);
-    light.intensity = 0.8;
+    light.intensity = 0.8; 
+// Addd a hemispheric light, which illuminates from above (y = 1)
+// Sets the light intensity to 0.8, making it a bit dimmer than the default
 
-    // Create a central planet (e.g., a star or large planet)
-    const centralPlanet = BABYLON.MeshBuilder.CreateSphere("centralPlanet", { diameter: 4 }, scene);
-    centralPlanet.material = new BABYLON.StandardMaterial("centralMaterial", scene);
-    centralPlanet.material.diffuseColor = new BABYLON.Color3(1, 0.8, 0); // Yellow color
+    const centralPlanet = BABYLON.MeshBuilder.CreateSphere("centralPlanet", { diameter: 4 }, scene); // Creates a central sphere (planet) with a diameter of 4 units
+    centralPlanet.material = new BABYLON.StandardMaterial("centralMaterial", scene); // Assigns a standard material to the central planet
+    centralPlanet.material.diffuseColor = new BABYLON.Color3(1, 0.8, 0); // Sets the colour of the central planet to a yellowish tone
 
-    // Create a smaller planet that will orbit around the central planet
-    const orbitingPlanet = BABYLON.MeshBuilder.CreateSphere("orbitingPlanet", { diameter: 1 }, scene);
-    orbitingPlanet.material = new BABYLON.StandardMaterial("orbitingMaterial", scene);
-    orbitingPlanet.material.diffuseColor = new BABYLON.Color3(0, 0.5, 1); // Blue color
+    const orbitingPlanet = BABYLON.MeshBuilder.CreateSphere("orbitingPlanet", { diameter: 1 }, scene); // Creates a smaller sphere (orbiting planet) with a diameter of 1 unit
+    orbitingPlanet.material = new BABYLON.StandardMaterial("orbitingMaterial", scene); // Assigns a standard material to the orbiting planet
+    orbitingPlanet.material.diffuseColor = new BABYLON.Color3(0, 0.5, 1); // Sets the colour of the orbiting planet to a shade of blue
 
-    // Set the initial position of the orbiting planet
-    const orbitRadius = 10;
-    orbitingPlanet.position.x = orbitRadius;
+    const orbitRadius = 10; // Defines the radius of the orbit for the smaller planet (circular motion)
+    orbitingPlanet.position.x = orbitRadius; // Sets the start position x of the orbiting planet to 10 units along the x-axis
 
-    // Rotate the orbiting planet around the central planet
-    scene.registerBeforeRender(() => {
-        const time = performance.now() * 0.001; // Get the current time in seconds
-        const rotationSpeed = 0.5; // Speed of the orbit
+    scene.registerBeforeRender(() => { // A function that runs before each render to update the orbiting planet's position
+        const time = performance.now() * 0.001; // Obtains the current time in seconds (scaled down by 1000)
+        const rotationSpeed = 0.5; // Sets the speed at which the orbiting planet circles the central planet
 
-        // Update the position of the orbiting planet using cosine and sine for circular movement
-        orbitingPlanet.position.x = Math.cos(time * rotationSpeed) * orbitRadius;
-        orbitingPlanet.position.z = Math.sin(time * rotationSpeed) * orbitRadius;
+        orbitingPlanet.position.x = Math.cos(time * rotationSpeed) * orbitRadius; // Updates the x position of the orbiting planet using cosine for circular motion
+        orbitingPlanet.position.z = Math.sin(time * rotationSpeed) * orbitRadius; // Updates the z position using sine for circular motion.
     });
 
-    return scene;
+    return scene; // Return the scene object created
 };
 
-// Create the scene
-const scene = createScene();
+const scene = createScene(); // Call createScene to generate the scene
 
-// Register a render loop to repeatedly render the scene
-engine.runRenderLoop(function () {
-    scene.render();
+engine.runRenderLoop(function () { // Register a loop to continuously render the scene, updating each frame
+    scene.render(); // Render the scene
 });
 
-// Watch for browser/canvas resize events
-window.addEventListener("resize", function () {
-    engine.resize();
+window.addEventListener("resize", function () { // Add an event listener for window resizing
+    engine.resize(); // Adjust the engine's rendering dimensions when the window resizes
 });
 
 
-//Though the code does work, for some reason an error message occurs saying: You must at least create a scene.
+
