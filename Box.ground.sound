@@ -1,15 +1,29 @@
-const createScene =  () => {
+const createScene = () => {
+    // Create a new scene to hold everything
     const scene = new BABYLON.Scene(engine);
 
-    /**** Set camera and light *****/
+    // Creates a camera that can rotate around the center of the scene.
+    // The camera starts at an angle that looks slightly down on the scenes origin (0,0,0)
     const camera = new BABYLON.ArcRotateCamera("camera", -Math.PI / 2, Math.PI / 2.5, 10, new BABYLON.Vector3(0, 0, 0));
+    
+    // Allows the user to control the camera with the mouse or touch
     camera.attachControl(canvas, true);
+
+    // Creates a dim light that shines from above to brighten the scene.
     const light = new BABYLON.HemisphericLight("light", new BABYLON.Vector3(1, 1, 0));
 
+  
+    // Add a box in the scene. By default, it’s centered at the origin, thus I move it up slightly to sit on the ground.
     const box = BABYLON.MeshBuilder.CreateBox("box", {});
     box.position.y = 0.5;
-    const ground = BABYLON.MeshBuilder.CreateGround("ground", {width:10, height:10});
 
-const sound = new BABYLON.Sound("Space", "https://www.youtube.com/watch?v=lpDZFDh46Ik", scene , null, { loop: true, autoplay: true});
+    // Create a flat ground for the box to sit on, 10 units wide and 10 units long.
+    const ground = BABYLON.MeshBuilder.CreateGround("ground", {width: 10, height: 10});
+
+    
+    // Add a looping background sound that plays automatically. Link is from YouTube.
+    const sound = new BABYLON.Sound("Space", "https://www.youtube.com/watch?v=lpDZFDh46Ik", scene, null, { loop: true, autoplay: true });
+
+    // Return the complete scene. Marks the end of scene.
     return scene;
 }
