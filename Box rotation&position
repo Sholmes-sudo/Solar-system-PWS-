@@ -1,20 +1,40 @@
 const createScene = () => {
-const scene = new BABYLON.Scene(engine);
-const camera = new BABYLON.ArcRotateCamera("Camera", -Math.PI / 2, Math.PI / 2.5, 3, new BABYLON.Vector3(0, 0, 0), scene);
-camera.attachControl(canvas, true);
+    // Create a new scene to hold everything
+    const scene = new BABYLON.Scene(engine);
 
-const light = new BABYLON.HemisphericLight("light", new BABYLON.Vector3(0, 1, 0), scene);
-const ground = BABYLON.MeshBuilder.CreateGround("ground", {width:10, height:10 });
-const box = BABYLON.MeshBuilder.CreateBox("box", {}); //unit cube
-box.scaling.x = 2;
-box.scaling.y = 1.5;
-box.scaling.z = 3;
+    // Creates a camera that can rotate around the center of the scene.
+    // The camera is set at an angle and distance to look slightly down on the scene's origin (0, 0, 0).
+    const camera = new BABYLON.ArcRotateCamera("Camera", -Math.PI / 2, Math.PI / 2.5, 3, new BABYLON.Vector3(0, 0, 0), scene);
 
-box.position.x = -2;
-box.position.y = 0.75;
-box.position.z = 0.1;
+    // Allows the user to control the camera
+    camera.attachControl(canvas, true);
 
-box.rotation.y = Math.PI / 4;
+    
+    // Creates a dim light source from above to brighten the scene
+    const light = new BABYLON.HemisphericLight("light", new BABYLON.Vector3(0, 1, 0), scene);
 
-return scene;
+
+    // Adds a flat ground that is 10x10 units in size for the box to sit on
+    const ground = BABYLON.MeshBuilder.CreateGround("ground", {width: 10, height: 10});
+
+   
+    // Creates a box with default size (1x1x1 units)
+    const box = BABYLON.MeshBuilder.CreateBox("box", {});
+
+    // Resizes the box to make it a rectangular shape:
+    // 2 units wide, 1.5 units tall, and 3 units deep
+    box.scaling.x = 2;
+    box.scaling.y = 1.5;
+    box.scaling.z = 3;
+
+    // Moves the box slightly away from the center
+    box.position.x = -2;
+    box.position.y = 0.75; // lift it up to sit on the ground
+    box.position.z = 0.1;
+
+    // Rotates the box slightly for a different perspective
+    box.rotation.y = Math.PI / 4; // rotates 45 degrees around the Y-axis
+
+    // Return the complete scene
+    return scene;
 }
