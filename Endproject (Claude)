@@ -1,42 +1,99 @@
-// Create the main scene function that will contain all our 3D elements
+// Global variables for acceleration and rocket state
+let acceleration = 0;
+const MAX_ACCELERATION = 4;
+const ACCELERATION_RATE = 0.05;
+const BASE_SPEED = 0.01;
+
 const createScene = function () {
     const scene = new BABYLON.Scene(engine);
+    scene.clearColor = new BABYLON.Color3(0.05, 0.05, 0.1); // Dark space background
     
-    // Setup camera with arc-rotate type (orbits around a target)
-    // Parameters: name, alpha (rotation), beta (elevation), radius, target position, scene
+    // Create advanced texture for menu and UI
+    const advancedTexture = BABYLON.GUI.AdvancedDynamicTexture.CreateFullscreenUI("UI");
+
+    // Create Start Menu
+    const createStartMenu = () => {
+        const menu = new BABYLON.GUI.Rectangle("startMenu");
+        menu.width = 0.8;
+        menu.height = 0.7;
+        menu.cornerRadius = 20;
+        menu.color = "white";
+        menu.thickness = 2;
+        menu.background = "black";
+        advancedTexture.addControl(menu);
+
+        // Title
+        const title = new BABYLON.GUI.TextBlock("title");
+        title.text = "Stellar Voyager";
+        title.color = "white";
+        title.fontSize = 48;
+        title.top = "-20%";
+        menu.addControl(title);
+
+        // Controls Page
+        const controlsText = new BABYLON.GUI.TextBlock("controlsText");
+        controlsText.text = `Controls:
+W/S: Pitch Up/Down
+A/D: Roll Left/Right
+SPACE: Accelerate
+SHIFT: Boost
+ESC: Return to Menu`;
+        controlsText.color = "white";
+        controlsText.fontSize = 24;
+        controlsText.top = "10%";
+        menu.addControl(controlsText);
+
+        // Start Button
+        const startButton = BABYLON.GUI.Button.CreateSimpleButton("startButton", "Start Mission");
+        startButton.width = 0.3;
+        startButton.height = "50px";
+        startButton.color = "white";
+        startButton.background = "green";
+        startButton.top = "40%";
+        startButton.onPointerUpObservable.add(() => {
+            menu.isVisible = false;
+        });
+        menu.addControl(startButton);
+
+        return menu;
+    };
+
+    const startMenu = createStartMenu();
+
+    // Setup camera
     const camera = new BABYLON.ArcRotateCamera("camera", 0, Math.PI / 2, 20, BABYLON.Vector3.Zero(), scene);
-    camera.attachControl(canvas, true);  // Enable camera controls with mouse/touch
-    camera.lowerRadiusLimit = 0.01;     // Minimum zoom distance
-    camera.upperRadiusLimit = 100;      // Maximum zoom distance
-    camera.wheelPrecision = 100;        // Mouse wheel sensitivity
-    camera.pinchPrecision = 100;        // Touch pinch sensitivity
-    camera.panningSensibility = 0;      // Disable panning
-    camera.useBouncingBehavior = false; // Disable bounce at zoom limits
+    camera.attachControl(canvas, true);
+    camera.lowerRadiusLimit = 0.01;
+    camera.upperRadiusLimit = 100000;
+    camera.wheelPrecision = 2;
+    camera.pinchPrecision = 2;
+    camera.panningSensibility = 0;
+    camera.useBouncingBehavior = false;
 
-    // Create a point light source at the center (sun position)
+    // Create point light
     const light = new BABYLON.PointLight("sunLight", BABYLON.Vector3.Zero(), scene);
-    light.intensity = 2;  // Make the light brighter than default
+    light.intensity = 2;
 
-    // Create the sun with emissive material (self-illuminating)
+    // Sun with emissive material
     const sunMaterial = new BABYLON.StandardMaterial("sunMaterial", scene);
-    sunMaterial.emissiveColor = new BABYLON.Color3(1, 1, 0);  // Yellow glowing color
-    const sun = BABYLON.MeshBuilder.CreateSphere("sun", {diameter: 1391}, scene);
+    sunMaterial.emissiveColor = new BABYLON.Color3(1, 1, 0);
+    const sun = BABYLON.MeshBuilder.CreateSphere("sun", {diameter: 1700}, scene);
     sun.material = sunMaterial;
 
-    // Define properties for each planet:
+      // Define properties for each planet:
     // - size: relative diameter
     // - orbit: distance from sun
     // - color: RGB color values
     // - period: orbital period in Earth days
     const planets = [
-        {name: "Mercury", size: 4.879, orbit: 4, color: new BABYLON.Color3(0.5, 0.5, 0.5), period: 88},
-        {name: "Venus", size: 12.104, orbit: 7, color: new BABYLON.Color3(0.9, 0.7, 0.4), period: 225},
-        {name: "Earth", size: 12.742, orbit: 10, color: new BABYLON.Color3(0.2, 0.4, 0.9), period: 365},
-        {name: "Mars", size: 6.779, orbit: 15, color: new BABYLON.Color3(0.9, 0.3, 0.1), period: 687},
-        {name: "Jupiter", size: 139.820, orbit: 26, color: new BABYLON.Color3(0.8, 0.7, 0.5), period: 4333},
-        {name: "Saturn", size: 116.460, orbit: 38, color: new BABYLON.Color3(0.9, 0.8, 0.6), period: 10759},
-        {name: "Uranus", size: 50.742, orbit: 49, color: new BABYLON.Color3(0.5, 0.7, 0.9), period: 30687},
-        {name: "Neptune", size: 49.224, orbit: 60, color: new BABYLON.Color3(0.2, 0.3, 0.9), period: 60190}
+        {name: "Mercury", size: 48.79, orbit: 2550, color: new BABYLON.Color3(0.5, 0.5, 0.5), period: 88},
+        {name: "Venus", size: 121.04, orbit: 4600, color: new BABYLON.Color3(0.9, 0.7, 0.4), period: 225},
+        {name: "Earth", size: 127.42, orbit: 5000, color: new BABYLON.Color3(0.2, 0.4, 0.9), period: 365},
+        {name: "Mars", size: 67.79, orbit: 6600, color: new BABYLON.Color3(0.9, 0.3, 0.1), period: 687},
+        {name: "Jupiter", size: 1398.20, orbit: 8600, color: new BABYLON.Color3(0.8, 0.7, 0.5), period: 4333},
+        {name: "Saturn", size: 1164.60, orbit: 10790, color: new BABYLON.Color3(0.9, 0.8, 0.6), period: 10759},
+        {name: "Uranus", size: 507.42, orbit: 12610, color: new BABYLON.Color3(0.5, 0.7, 0.9), period: 30687},
+        {name: "Neptune", size: 492.24, orbit: 15025, color: new BABYLON.Color3(0.2, 0.3, 0.9), period: 60190}
     ];
 
     // Create all planets and their orbits
@@ -107,23 +164,77 @@ const createScene = function () {
         });
     });
 
-    // Create player-controlled rocket
-    const rocketMaterial = new BABYLON.StandardMaterial("rocketMaterial", scene);
-    rocketMaterial.diffuseColor = new BABYLON.Color3(1, 0, 0);  // Red color
-    const rocket = BABYLON.MeshBuilder.CreateCylinder("rocket", {height: 0.02, diameter: 0.005}, scene);
-    rocket.material = rocketMaterial;
-    rocket.position = new BABYLON.Vector3(10, 0, 0);  // Start near Earth's orbit
-    rocket.rotation.z = Math.PI / 2;  // Point rocket sideways initially
+    // Sun label
+    const sunLabel = createPlanetLabel("Sun", sun, "Distance: 0 AU");
+    
+    // Rocket with texture and shape
+    const createRocketMesh = () => {
+        const rocketGroup = new BABYLON.TransformNode("rocket", scene);
+        
+        // Rocket body
+        const body = BABYLON.MeshBuilder.CreateCylinder("rocketBody", {height: 2, diameterTop: 0.4, diameterBottom: 0.6}, scene);
+        body.parent = rocketGroup;
+        body.rotation.x = Math.PI/2;
 
-    // Prevent rocket from becoming too small to see when far away
-    rocket.minScaleFactorX = 0.1;
-    rocket.minScaleFactorY = 0.1;
-    rocket.minScaleFactorZ = 0.1;
+        // Nose cone
+        const noseCone = BABYLON.MeshBuilder.CreateCylinder("noseCone", {height: 0.5, diameterTop: 0, diameterBottom: 0.4}, scene);
+        noseCone.position.z = 1.25;
+        noseCone.parent = rocketGroup;
+        noseCone.rotation.x = Math.PI/2;
 
-    // Make camera follow the rocket
-    camera.lockedTarget = rocket;
+        // Rocket Material
+        const rocketMaterial = new BABYLON.StandardMaterial("rocketMaterial", scene);
+        rocketMaterial.diffuseColor = new BABYLON.Color3(0.7, 0.7, 0.7);
+        body.material = rocketMaterial;
+        noseCone.material = rocketMaterial;
 
-    // Control state variables for rocket movement
+        // Rocket exhaust/fire particle system
+        const particleSystem = new BABYLON.ParticleSystem("rocketExhaust", 2000, scene);
+        particleSystem.emitter = body.position.clone();
+        particleSystem.minEmitBox = new BABYLON.Vector3(-0.1, 0, -0.1);
+        particleSystem.maxEmitBox = new BABYLON.Vector3(0.1, 0, 0.1);
+        particleSystem.color1 = new BABYLON.Color4(1, 0.5, 0, 1);
+        particleSystem.color2 = new BABYLON.Color4(1, 0.2, 0, 0.5);
+        particleSystem.colorDead = new BABYLON.Color4(0, 0, 0, 0);
+        particleSystem.minSize = 0.01;
+        particleSystem.maxSize = 0.1;
+        particleSystem.minLifeTime = 0.1;
+        particleSystem.maxLifeTime = 0.3;
+        particleSystem.emitRate = 500;
+        particleSystem.blendMode = BABYLON.ParticleSystem.BLENDMODE_ONEONE;
+        particleSystem.gravity = new BABYLON.Vector3(0, 0, 0);
+        particleSystem.direction1 = new BABYLON.Vector3(0, -1, 0);
+        particleSystem.direction2 = new BABYLON.Vector3(0, -1, 0);
+
+        return { rocketGroup, particleSystem };
+    };
+
+    const { rocketGroup, particleSystem } = createRocketMesh();
+    rocketGroup.position = new BABYLON.Vector3(5000, 0, 0);  // Near Earth's orbit
+    camera.lockedTarget = rocketGroup;
+
+    // Create planet label function
+    function createPlanetLabel(name, mesh, customText = "") {
+        const label = new BABYLON.GUI.Rectangle(`label-${name}`);
+        label.background = "rgba(0,0,0,0.5)";
+        label.height = "20px";
+        label.width = "150px";
+        label.cornerRadius = 10;
+        label.thickness = 1;
+
+        const text = new BABYLON.GUI.TextBlock();
+        text.text = `${name}\n${customText}`;
+        text.color = "white";
+        text.fontSize = 12;
+        label.addControl(text);
+
+        advancedTexture.addControl(label);
+        label.linkWithMesh(mesh);
+
+        return label;
+    }
+
+    // Rocket control state variables
     let moveForward = false;
     let moveForwardFast = false;
     let rotateUp = false;
@@ -131,11 +242,16 @@ const createScene = function () {
     let rotateLeft = false;
     let rotateRight = false;
 
-    // Setup keyboard controls
-    // WASD: Rotation
-    // Space: Move forward
-    // Shift: Move forward faster
+    // Keyboard controls
     scene.onKeyboardObservable.add((kbInfo) => {
+        // If start menu is visible, only allow ESC key
+        if (startMenu.isVisible) {
+            if (kbInfo.type === BABYLON.KeyboardEventTypes.KEYDOWN && kbInfo.event.key === "Escape") {
+                startMenu.isVisible = false;
+            }
+            return;
+        }
+
         switch (kbInfo.type) {
             case BABYLON.KeyboardEventTypes.KEYDOWN:
                 switch (kbInfo.event.key) {
@@ -145,6 +261,7 @@ const createScene = function () {
                     case "d": rotateRight = true; break;
                     case " ": moveForward = true; break;
                     case "Shift": moveForwardFast = true; break;
+                    case "Escape": startMenu.isVisible = true; break;
                 }
                 break;
             case BABYLON.KeyboardEventTypes.KEYUP:
@@ -153,53 +270,101 @@ const createScene = function () {
                     case "s": rotateDown = false; break;
                     case "a": rotateLeft = false; break;
                     case "d": rotateRight = false; break;
-                    case " ": moveForward = false; break;
+                    case " ": 
+                        moveForward = false; 
+                        acceleration = 0;
+                        particleSystem.stop();
+                        break;
                     case "Shift": moveForwardFast = false; break;
                 }
                 break;
         }
     });
 
-    // Constants for rocket movement
-    const rotationSpeed = 0.02;
-    const movementSpeed = 0.005;
-    const fastMovementSpeed = 0.02;
-    const initialRocketPosition = new BABYLON.Vector3(10, 0, 0);
+    // Update rocket labels with distances
+    function updateLabels() {
+        planetMeshes.forEach((planetMesh, index) => {
+            const distance = BABYLON.Vector3.Distance(rocketGroup.position, planetMesh.position);
+            const label = advancedTexture.getChildren().find(
+                child => child instanceof BABYLON.GUI.Rectangle && 
+                         child.name === `label-${planets[index].name}`
+            );
+            
+            if (label) {
+                const textBlock = label.getChildByName("textBlock");
+                if (textBlock) {
+                    textBlock.text = `${planets[index].name}\nDist: ${(distance/1000).toFixed(2)} AU`;
+                }
+            }
+        });
 
-    // Updates rocket position and handle collisions
+        // Update sun label
+        const sunLabel = advancedTexture.getChildren().find(
+            child => child instanceof BABYLON.GUI.Rectangle && child.name === "label-Sun"
+        );
+        if (sunLabel) {
+            const distanceToSun = BABYLON.Vector3.Distance(rocketGroup.position, BABYLON.Vector3.Zero());
+            const textBlock = sunLabel.getChildByName("textBlock");
+            if (textBlock) {
+                textBlock.text = `Sun\nDist: ${(distanceToSun/1000).toFixed(2)} AU`;
+            }
+        }
+    }
+
+    // Animation loop for rocket and planet movement
     scene.onBeforeRenderObservable.add(() => {
-        // Handles forward movement
+        // Planet orbit animation
+        planets.forEach((planet, index) => {
+            const planetMesh = planetMeshes[index];
+            const orbitSpeed = (1 / planet.period) * 2 * Math.PI / 600;
+            const currentAngle = Math.atan2(planetMesh.position.z, planetMesh.position.x);
+            const newAngle = currentAngle + orbitSpeed;
+            planetMesh.position.x = planet.orbit * Math.cos(newAngle);
+            planetMesh.position.z = planet.orbit * Math.sin(newAngle);
+        });
+
+        // Rocket movement
         if (moveForward || moveForwardFast) {
-            const speed = moveForwardFast ? fastMovementSpeed : movementSpeed;
-            const forwardVector = new BABYLON.Vector3(0, 1, 0);
-            const rotatedForwardVector = BABYLON.Vector3.TransformNormal(forwardVector, rocket.getWorldMatrix());
-            rocket.position.addInPlace(rotatedForwardVector.scale(speed));
+            // Accelerate smoothly
+            acceleration = Math.min(acceleration + ACCELERATION_RATE, MAX_ACCELERATION);
+            particleSystem.start();
+
+            const speed = (moveForwardFast ? 2 : 1) * (BASE_SPEED + acceleration);
+            const forwardVector = new BABYLON.Vector3(0, 0, 1);
+            const rotatedForwardVector = BABYLON.Vector3.TransformNormal(forwardVector, rocketGroup.getWorldMatrix());
+            rocketGroup.position.addInPlace(rotatedForwardVector.scale(speed));
         }
         
-        // Handles rotation
-        if (rotateUp) rocket.rotate(BABYLON.Axis.Z, -rotationSpeed, BABYLON.Space.LOCAL);
-        if (rotateDown) rocket.rotate(BABYLON.Axis.Z, rotationSpeed, BABYLON.Space.LOCAL);
-        if (rotateLeft) rocket.rotate(BABYLON.Axis.X, -rotationSpeed, BABYLON.Space.LOCAL);
-        if (rotateRight) rocket.rotate(BABYLON.Axis.X, rotationSpeed, BABYLON.Space.LOCAL);
+        // Rotation controls
+        if (rotateUp) rocketGroup.rotate(BABYLON.Axis.X, -0.02, BABYLON.Space.LOCAL);
+        if (rotateDown) rocketGroup.rotate(BABYLON.Axis.X, 0.02, BABYLON.Space.LOCAL);
+        if (rotateLeft) rocketGroup.rotate(BABYLON.Axis.Y, -0.02, BABYLON.Space.LOCAL);
+        if (rotateRight) rocketGroup.rotate(BABYLON.Axis.Y, 0.02, BABYLON.Space.LOCAL);
 
-        // Checks for collisions with planets and prevent intersection
+        // Update planet and sun labels
+        updateLabels();
+
+        // Collision detection
         planetMeshes.forEach(planetMesh => {
-            const distance = BABYLON.Vector3.Distance(rocket.position, planetMesh.position);
+            const distance = BABYLON.Vector3.Distance(rocketGroup.position, planetMesh.position);
             const planetRadius = planetMesh.scaling.x / 2;
             if (distance <= planetRadius + 0.01) {
-                // Push rocket away from planet surface
-                const awayVector = rocket.position.subtract(planetMesh.position).normalize();
-                rocket.position = planetMesh.position.add(awayVector.scale(planetRadius + 0.01));
+                const awayVector = rocketGroup.position.subtract(planetMesh.position).normalize();
+                rocketGroup.position = planetMesh.position.add(awayVector.scale(planetRadius + 0.01));
             }
         });
 
         // Reset rocket if it hits the sun
-        const distanceToSun = BABYLON.Vector3.Distance(rocket.position, BABYLON.Vector3.Zero());
-        if (distanceToSun <= 1) {  // Sun radius is 1
-            rocket.position = initialRocketPosition.clone();
-            rocket.rotation = new BABYLON.Vector3(0, 0, Math.PI / 2);
+        const distanceToSun = BABYLON.Vector3.Distance(rocketGroup.position, BABYLON.Vector3.Zero());
+        if (distanceToSun <= 500) {
+            rocketGroup.position = new BABYLON.Vector3(1000, 0, 0);
+            rocketGroup.rotation = new BABYLON.Vector3(0, 0, Math.PI / 2);
+            acceleration = 0;
+            particleSystem.stop();
         }
     });
 
     return scene;
 };
+
+
