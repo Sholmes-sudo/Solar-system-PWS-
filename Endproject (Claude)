@@ -234,13 +234,13 @@ ESC: Return to Menu`; // list of controls
         return label;
     }
 
-    // Rocket controls
-    let moveForward = false; 
-    let moveForwardFast = false; 
-    let rotateUp = false; 
-    let rotateDown = false; 
-    let rotateLeft = false;
-    let rotateRight = false;
+    // Rocket controls, flag that indicates if the rocket is moving...
+    let moveForward = false;  // forwards
+    let moveForwardFast = false; // fast (boost)
+    let rotateUp = false;  // for rotating upwards
+    let rotateDown = false; // for rotating backwards
+    let rotateLeft = false; // left
+    let rotateRight = false; // right
 
     // Keyboard controls
     scene.onKeyboardObservable.add((kbInfo) => {
@@ -253,27 +253,27 @@ ESC: Return to Menu`; // list of controls
         }
 
         switch (kbInfo.type) {
-            case BABYLON.KeyboardEventTypes.KEYDOWN:
+            case BABYLON.KeyboardEventTypes.KEYDOWN: // when a key is pressed down
                 switch (kbInfo.event.key) {
-                    case "w": rotateUp = true; break;
-                    case "s": rotateDown = true; break;
-                    case "a": rotateLeft = true; break;
-                    case "d": rotateRight = true; break;
-                    case " ": moveForward = true; break;
-                    case "Shift": moveForwardFast = true; break;
-                    case "Escape": startMenu.isVisible = true; break;
+                    case "w": rotateUp = true; break; // rotate up if 'w' is pressed
+                    case "s": rotateDown = true; break; // if 's' is pressed
+                    case "a": rotateLeft = true; break; // if 'a' is pressed
+                    case "d": rotateRight = true; break; // if 'd' is pressed
+                    case " ": moveForward = true; break; // if 'space-bar' is pressed
+                    case "Shift": moveForwardFast = true; break; // if 'shift' is pressed
+                    case "Escape": startMenu.isVisible = true; break; // if 'Esacpe' is pressed
                 }
                 break;
-            case BABYLON.KeyboardEventTypes.KEYUP:
+            case BABYLON.KeyboardEventTypes.KEYUP: // when a key is released
                 switch (kbInfo.event.key) {
-                    case "w": rotateUp = false; break;
-                    case "s": rotateDown = false; break;
-                    case "a": rotateLeft = false; break;
-                    case "d": rotateRight = false; break;
-                    case " ": 
+                    case "w": rotateUp = false; break; // stops rotating if 'w' is released
+                    case "s": rotateDown = false; break; // stops rotating if 's' is released
+                    case "a": rotateLeft = false; break; // stops rotating if 'a' is released
+                    case "d": rotateRight = false; break; // stops rotating if 'd' is released
+                    case " ": // stops moving forward if 'space bar' is released
                         moveForward = false; 
-                        acceleration = 0;
-                        particleSystem.stop();
+                        acceleration = 0; // resets acceleration
+                        particleSystem.stop(); // stops particle system when stopping movement
                         break;
                     case "Shift": moveForwardFast = false; break;
                 }
@@ -293,7 +293,7 @@ ESC: Return to Menu`; // list of controls
             if (label) {
                 const textBlock = label.getChildByName("textBlock");
                 if (textBlock) {
-                    textBlock.text = `${planets[index].name}\nDist: ${(distance/1000).toFixed(2)} AU`;
+                    textBlock.text = `${planets[index].name}\nDist: ${(distance/1000).toFixed(2)} AU`; //updates the label with planet's name and distance
                 }
             }
         });
@@ -316,51 +316,51 @@ ESC: Return to Menu`; // list of controls
         // Planet orbit animation
         planets.forEach((planet, index) => {
             const planetMesh = planetMeshes[index];
-            const orbitSpeed = (1 / planet.period) * 2 * Math.PI / 600;
-            const currentAngle = Math.atan2(planetMesh.position.z, planetMesh.position.x);
-            const newAngle = currentAngle + orbitSpeed;
-            planetMesh.position.x = planet.orbit * Math.cos(newAngle);
-            planetMesh.position.z = planet.orbit * Math.sin(newAngle);
+            const orbitSpeed = (1 / planet.period) * 2 * Math.PI / 600; // calculates speed of the planet's orbit based on its period
+            const currentAngle = Math.atan2(planetMesh.position.z, planetMesh.position.x); // get the current angle of the planet
+            const newAngle = currentAngle + orbitSpeed; // increment angle to move the planet in its orbit
+            planetMesh.position.x = planet.orbit * Math.cos(newAngle); // update planet's x-coordinate
+            planetMesh.position.z = planet.orbit * Math.sin(newAngle); // Update planets y-coordinate
         });
 
         // Rocket movement
         if (moveForward || moveForwardFast) {
             // Accelerates smoothly
-            acceleration = Math.min(acceleration + ACCELERATION_RATE, MAX_ACCELERATION);
+            acceleration = Math.min(acceleration + ACCELERATION_RATE, MAX_ACCELERATION); //gradually increases acceleration
             particleSystem.start();
 
-            const speed = (moveForwardFast ? 2 : 1) * (BASE_SPEED + acceleration);
-            const forwardVector = new BABYLON.Vector3(0, 0, 1);
-            const rotatedForwardVector = BABYLON.Vector3.TransformNormal(forwardVector, rocketGroup.getWorldMatrix());
-            rocketGroup.position.addInPlace(rotatedForwardVector.scale(speed));
+            const speed = (moveForwardFast ? 2 : 1) * (BASE_SPEED + acceleration); //adjusts speed based on boost
+            const forwardVector = new BABYLON.Vector3(0, 0, 1); // defines forwards vector
+            const rotatedForwardVector = BABYLON.Vector3.TransformNormal(forwardVector, rocketGroup.getWorldMatrix()); //Rotates forwards vector based on rocket's orientation
+            rocketGroup.position.addInPlace(rotatedForwardVector.scale(speed)); // move rocket forwards by calculated speed.
         }
         
         // Rotation controls
-        if (rotateUp) rocketGroup.rotate(BABYLON.Axis.X, -0.02, BABYLON.Space.LOCAL);
-        if (rotateDown) rocketGroup.rotate(BABYLON.Axis.X, 0.02, BABYLON.Space.LOCAL);
-        if (rotateLeft) rocketGroup.rotate(BABYLON.Axis.Y, -0.02, BABYLON.Space.LOCAL);
-        if (rotateRight) rocketGroup.rotate(BABYLON.Axis.Y, 0.02, BABYLON.Space.LOCAL);
+        if (rotateUp) rocketGroup.rotate(BABYLON.Axis.X, -0.02, BABYLON.Space.LOCAL); // Rotate up if rotateUp flag is true
+        if (rotateDown) rocketGroup.rotate(BABYLON.Axis.X, 0.02, BABYLON.Space.LOCAL); // Rotate down if rotateDown flag is true
+        if (rotateLeft) rocketGroup.rotate(BABYLON.Axis.Y, -0.02, BABYLON.Space.LOCAL); // Rotate left if rotateleft flag is true
+        if (rotateRight) rocketGroup.rotate(BABYLON.Axis.Y, 0.02, BABYLON.Space.LOCAL); // Rotate right if rotateRight flag is true
 
         // Update planet and sun labels
         updateLabels();
 
         // Collision detection
         planetMeshes.forEach(planetMesh => {
-            const distance = BABYLON.Vector3.Distance(rocketGroup.position, planetMesh.position);
-            const planetRadius = planetMesh.scaling.x / 2;
-            if (distance <= planetRadius + 0.01) {
-                const awayVector = rocketGroup.position.subtract(planetMesh.position).normalize();
-                rocketGroup.position = planetMesh.position.add(awayVector.scale(planetRadius + 0.01));
+            const distance = BABYLON.Vector3.Distance(rocketGroup.position, planetMesh.position); // Calculates distance from the rocket to each planet
+            const planetRadius = planetMesh.scaling.x / 2; // gets planet's radius
+            if (distance <= planetRadius + 0.01) {  //if the rocket is too close to the planet
+                const awayVector = rocketGroup.position.subtract(planetMesh.position).normalize(); // Calculate a vector to move the rocket away
+                rocketGroup.position = planetMesh.position.add(awayVector.scale(planetRadius + 0.01)); // Move rocket slightly away from planet.
             }
         });
 
         // Reset rocket if it hits the sun
-        const distanceToSun = BABYLON.Vector3.Distance(rocketGroup.position, BABYLON.Vector3.Zero());
+        const distanceToSun = BABYLON.Vector3.Distance(rocketGroup.position, BABYLON.Vector3.Zero()); //Calculates distance from the sun
         if (distanceToSun <= 500) {
-            rocketGroup.position = new BABYLON.Vector3(1000, 0, 0);
-            rocketGroup.rotation = new BABYLON.Vector3(0, 0, Math.PI / 2);
-            acceleration = 0;
-            particleSystem.stop();
+            rocketGroup.position = new BABYLON.Vector3(1000, 0, 0); //resets rocket postition
+            rocketGroup.rotation = new BABYLON.Vector3(0, 0, Math.PI / 2); //resets rotation
+            acceleration = 0; //resets acceleration
+            particleSystem.stop(); //resets particle system
         }
     });
 
