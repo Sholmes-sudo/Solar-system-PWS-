@@ -20,7 +20,7 @@ const createScene = function () {
     // Create the sun with emissive material (self-illuminating)
     const sunMaterial = new BABYLON.StandardMaterial("sunMaterial", scene);
     sunMaterial.emissiveColor = new BABYLON.Color3(1, 1, 0);  // Yellow glowing color
-    const sun = BABYLON.MeshBuilder.CreateSphere("sun", {diameter: 2}, scene);
+    const sun = BABYLON.MeshBuilder.CreateSphere("sun", {diameter: 1391}, scene);
     sun.material = sunMaterial;
 
     // Define properties for each planet:
@@ -29,14 +29,14 @@ const createScene = function () {
     // - color: RGB color values
     // - period: orbital period in Earth days
     const planets = [
-        {name: "Mercury", size: 0.05, orbit: 4, color: new BABYLON.Color3(0.5, 0.5, 0.5), period: 88},
-        {name: "Venus", size: 0.08, orbit: 7, color: new BABYLON.Color3(0.9, 0.7, 0.4), period: 225},
-        {name: "Earth", size: 0.09, orbit: 10, color: new BABYLON.Color3(0.2, 0.4, 0.9), period: 365},
-        {name: "Mars", size: 0.05, orbit: 15, color: new BABYLON.Color3(0.9, 0.3, 0.1), period: 687},
-        {name: "Jupiter", size: 0.4, orbit: 26, color: new BABYLON.Color3(0.8, 0.7, 0.5), period: 4333},
-        {name: "Saturn", size: 0.3, orbit: 38, color: new BABYLON.Color3(0.9, 0.8, 0.6), period: 10759},
-        {name: "Uranus", size: 0.15, orbit: 49, color: new BABYLON.Color3(0.5, 0.7, 0.9), period: 30687},
-        {name: "Neptune", size: 0.14, orbit: 60, color: new BABYLON.Color3(0.2, 0.3, 0.9), period: 60190}
+        {name: "Mercury", size: 4.879, orbit: 4, color: new BABYLON.Color3(0.5, 0.5, 0.5), period: 88},
+        {name: "Venus", size: 12.104, orbit: 7, color: new BABYLON.Color3(0.9, 0.7, 0.4), period: 225},
+        {name: "Earth", size: 12.742, orbit: 10, color: new BABYLON.Color3(0.2, 0.4, 0.9), period: 365},
+        {name: "Mars", size: 6.779, orbit: 15, color: new BABYLON.Color3(0.9, 0.3, 0.1), period: 687},
+        {name: "Jupiter", size: 139.820, orbit: 26, color: new BABYLON.Color3(0.8, 0.7, 0.5), period: 4333},
+        {name: "Saturn", size: 116.460, orbit: 38, color: new BABYLON.Color3(0.9, 0.8, 0.6), period: 10759},
+        {name: "Uranus", size: 50.742, orbit: 49, color: new BABYLON.Color3(0.5, 0.7, 0.9), period: 30687},
+        {name: "Neptune", size: 49.224, orbit: 60, color: new BABYLON.Color3(0.2, 0.3, 0.9), period: 60190}
     ];
 
     // Create all planets and their orbits
